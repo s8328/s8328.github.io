@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /*/index.json
+Disallow: /*/index.xml
+Disallow: /*/manifest.json
+Disallow: /*/opensearch.xml
+Disallow: /*/search.json
+Disallow: /*/turbo.json
+Disallow: /*/drafts/
+Disallow: /*/footer/
+
+Sitemap: https://netcfg.ru/sitemap.xml
