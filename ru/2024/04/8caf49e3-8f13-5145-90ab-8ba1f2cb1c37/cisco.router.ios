@@ -1,0 +1,180 @@
+! @package    Cisco / IOS
+! @author     Kai Kimera <mail@kai.kim>
+! @copyright  2024 Library Online
+! @license    MIT
+! @version    0.1.0
+! @link       https://libsys.ru/ru/2024/04/8caf49e3-8f13-5145-90ab-8ba1f2cb1c37/
+! -------------------------------------------------------------------------------------------------------------------- !
+!
+! -------------------------------------------------------------------------------------------------------------------- !
+! SERVICES.
+! -------------------------------------------------------------------------------------------------------------------- !
+service password-encryption
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service tcp-keepalives-in
+service tcp-keepalives-out
+service sequence-numbers
+no service pad
+no service udp-small-servers
+no service tcp-small-servers
+no service finger
+! -------------------------------------------------------------------------------------------------------------------- !
+! GENERAL.
+! -------------------------------------------------------------------------------------------------------------------- !
+clock timezone UTC 3
+!clock update-calendar
+hostname gw1
+logging buffered 4096
+logging console critical
+ip cef
+ip multicast-routing
+ip tcp path-mtu-discovery
+ip tcp selective-ack
+ip tcp timestamp
+no ip source-route
+no ip bootp server
+memory reserve critical 4096
+!memory reserve console 512
+! -------------------------------------------------------------------------------------------------------------------- !
+! Authentication, Authorization, and Accounting (AAA).
+! -------------------------------------------------------------------------------------------------------------------- !
+aaa new-model
+aaa authentication login default local
+aaa authentication ppp default local
+enable password qwerty-en
+username admin privilege 15 password qwerty-admin
+! -------------------------------------------------------------------------------------------------------------------- !
+! LOGIN.
+! -------------------------------------------------------------------------------------------------------------------- !
+!login block-for 60 attempts 3 within 10
+!login delay 5
+!login quiet-mode access-class 10
+!login on-failure log every 5
+!login on-success log every 3
+! -------------------------------------------------------------------------------------------------------------------- !
+! TERMINAL.
+! -------------------------------------------------------------------------------------------------------------------- !
+line con 0
+  logging synchronous
+  exec-timeout 60 0
+line vty 0 4
+  access-class ACL_VTY in
+  logging synchronous
+  privilege level 15
+  transport input telnet ssh
+  exec-timeout 60 0
+line aux 0
+  transport input none
+  transport output none
+  no exec
+  exec-timeout 0 1
+  no password
+! -------------------------------------------------------------------------------------------------------------------- !
+! SSH.
+! Generate RSA key pairs for SSH Public-Key Authentication:
+! - crypto key generate rsa modulus 2048
+! -------------------------------------------------------------------------------------------------------------------- !
+ip ssh authentication-retries 5
+ip ssh version 2
+! -------------------------------------------------------------------------------------------------------------------- !
+! SNMP server.
+! -------------------------------------------------------------------------------------------------------------------- !
+snmp-server community CISCO_ID ro ACL_SNMP_RO
+snmp-server location Petrovka 37, 2 floor, room 220
+snmp-server contact mail@example.org
+!
+ip access-list standard ACL_SNMP_RO
+  remark Hosts permitted to read SNMP MIBs.
+  permit host 10.88.10.22
+! -------------------------------------------------------------------------------------------------------------------- !
+! INTERFACES.
+! -------------------------------------------------------------------------------------------------------------------- !
+interface FastEthernet0/0
+  ip address dhcp
+  ip nat outside
+interface FastEthernet0/1
+  ip address 10.88.0.1 255.255.0.0
+  ip nat inside
+interface Loopback0
+  ip address 10.90.10.1 255.255.255.255
+interface Loopback1
+  ip address 10.90.20.1 255.255.255.255
+no ip http server
+no ip http secure-server
+! -------------------------------------------------------------------------------------------------------------------- !
+! NTP.
+! -------------------------------------------------------------------------------------------------------------------- !
+ntp update-calendar
+ntp server 194.190.168.1
+! -------------------------------------------------------------------------------------------------------------------- !
+! DNS.
+! -------------------------------------------------------------------------------------------------------------------- !
+ip domain timeout 2
+ip domain name home.lan
+ip name-server 1.1.1.1
+ip name-server 8.8.8.8
+ip dns server
+! -------------------------------------------------------------------------------------------------------------------- !
+! DHCP.
+! -------------------------------------------------------------------------------------------------------------------- !
+service dhcp FastEthernet0/1
+ip dhcp excluded-address 10.88.0.1
+ip dhcp excluded-address 10.88.0.2 10.88.200.0
+ip dhcp pool LAN
+  network 10.88.0.0 255.255.0.0
+  default-router 10.88.0.1
+  domain-name home.lan
+  dns-server 10.88.0.1
+! -------------------------------------------------------------------------------------------------------------------- !
+! NAT.
+! -------------------------------------------------------------------------------------------------------------------- !
+ip nat inside source route-map RM_NAT_ISP0 interface FastEthernet0/0 overload
+!ip nat inside source route-map RM_NAT_ISP1 interface FastEthernet0/1 overload
+! -------------------------------------------------------------------------------------------------------------------- !
+! ACL.
+! -------------------------------------------------------------------------------------------------------------------- !
+ip access-list standard ACL_VTY
+  remark Hosts permitted to VTY.
+  permit 10.0.0.0 0.255.255.255
+  permit 172.16.0.0 0.15.255.255
+  permit 192.168.0.0 0.0.255.255
+ip access-list standard ACL_NAT
+  remark Hosts permitted to NAT.
+  permit 10.88.0.0 0.0.255.255
+! -------------------------------------------------------------------------------------------------------------------- !
+! ROUTE MAPS.
+! -------------------------------------------------------------------------------------------------------------------- !
+! Internet Service Provider #0.
+route-map RM_NAT_ISP0 permit 10
+  match ip address ACL_NAT
+  match interface FastEthernet0/0
+! Internet Service Provider #1.
+!route-map RM_NAT_ISP1 permit 20
+!  match ip address ACL_NAT
+!  match interface FastEthernet0/1
+! -------------------------------------------------------------------------------------------------------------------- !
+! SLA.
+! -------------------------------------------------------------------------------------------------------------------- !
+ip sla 100
+  icmp-echo 8.8.8.8 source-interface FastEthernet0/0
+  threshold 1000
+  timeout 1000
+  frequency 10
+ip sla schedule 100 life forever start-time now
+ip sla 101
+  icmp-echo 77.88.8.8 source-interface FastEthernet0/0
+  threshold 1000
+  timeout 1000
+  frequency 10
+ip sla schedule 101 life forever start-time now
+! -------------------------------------------------------------------------------------------------------------------- !
+! TRACKs.
+! -------------------------------------------------------------------------------------------------------------------- !
+track 100 ip sla 100 reachability
+track 101 ip sla 101 reachability
+track 105 list boolean or
+  object 100
+  object 101
+!
+end
