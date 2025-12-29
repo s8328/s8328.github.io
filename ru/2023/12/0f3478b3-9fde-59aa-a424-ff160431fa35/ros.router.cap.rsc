@@ -1,9 +1,11 @@
-# @package    MikroTik / RouterOS / CAPsMAN
-# @author     Kai Kimera <mail@kai.kim>
-# @copyright  2023 Library Online
+# -------------------------------------------------------------------------------------------------------------------- #
+# MIKROTIK: CAPsMAN
+# -------------------------------------------------------------------------------------------------------------------- #
+# @package    RouterOS
+# @author     Kai Kimera <mail@kaikim.ru>
 # @license    MIT
 # @version    0.1.0
-# @link       https://libsys.ru/ru/2023/12/0f3478b3-9fde-59aa-a424-ff160431fa35/
+# @link       https://netcfg.ru/ru/2023/12/0f3478b3-9fde-59aa-a424-ff160431fa35/
 # -------------------------------------------------------------------------------------------------------------------- #
 
 :local name "common"

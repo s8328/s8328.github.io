@@ -2,19 +2,15 @@
 # MIKROTIK: GRE DYNAMIC IP
 # -------------------------------------------------------------------------------------------------------------------- #
 # @package    RouterOS
-# @author     Kai Kimera <mail@kai.kim>
+# @author     Kai Kimera <mail@kaikim.ru>
 # @license    MIT
 # @version    0.1.0
 # @policy     read, write, test
 # @schedule:  00:15:00
-# @link       https://libsys.ru/ru/articles/2024/04/326618af-d950-5001-8114-57c66bb8a5af/
+# @link       https://netcfg.ru/ru/articles/2024/04/326618af-d950-5001-8114-57c66bb8a5af/
 # -------------------------------------------------------------------------------------------------------------------- #
 
 :local wanInterface "ether1"
-
-# -------------------------------------------------------------------------------------------------------------------- #
-# -----------------------------------------------------< SCRIPT >----------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------------- #
 
 :local wanAddress [/ip address get [find interface=$wanInterface] address]
 :set wanAddress [:pick $wanAddress 0 [:find $wanAddress "/"]]

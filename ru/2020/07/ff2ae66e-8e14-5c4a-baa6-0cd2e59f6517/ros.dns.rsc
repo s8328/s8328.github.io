@@ -2,12 +2,12 @@
 # MIKROTIK: CLOUDFLARE DNS
 # -------------------------------------------------------------------------------------------------------------------- #
 # @package    RouterOS
-# @author     Kai Kimera <mail@kai.kim>
+# @author     Kai Kimera <mail@kaikim.ru>
 # @license    MIT
 # @version    0.1.0
 # @policy     read, write, test
 # @schedule:  00:10:00
-# @link       https://libsys.ru/ru/2020/07/ff2ae66e-8e14-5c4a-baa6-0cd2e59f6517/
+# @link       https://netcfg.ru/ru/2020/07/ff2ae66e-8e14-5c4a-baa6-0cd2e59f6517/
 # -------------------------------------------------------------------------------------------------------------------- #
 
 :local rosWanInterface "ether1"
@@ -18,10 +18,6 @@
 :local cfDnsID ""
 :local cfRecordType "A"
 :local cfDebug 0
-
-# -------------------------------------------------------------------------------------------------------------------- #
-# -----------------------------------------------------< SCRIPT >----------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------------- #
 
 :local srcIP [/ip address get [find interface=$rosWanInterface] address]
 :set srcIP [:pick $srcIP 0 [:find $srcIP "/"]]

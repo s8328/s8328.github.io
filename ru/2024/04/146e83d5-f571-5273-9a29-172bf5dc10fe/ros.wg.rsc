@@ -1,9 +1,9 @@
 # @package    MikroTik / RouterOS / WireGuard
-# @author     Kai Kimera <mail@kai.kim>
+# @author     Kai Kimera <mail@kaikim.ru>
 # @copyright  2024 Library Online
 # @license    MIT
 # @version    0.1.0
-# @link       https://libsys.ru/ru/2024/04/146e83d5-f571-5273-9a29-172bf5dc10fe/
+# @link       https://netcfg.ru/ru/2024/04/146e83d5-f571-5273-9a29-172bf5dc10fe/
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # WireGuard interface name.
