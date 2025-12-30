@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------------------------------------------- #
-# MIKROTIK: ACME
+# ACME
 # -------------------------------------------------------------------------------------------------------------------- #
 # @package    RouterOS
 # @author     Kai Kimera <mail@kaikim.ru>
@@ -12,10 +12,14 @@
 
 :local domain "example.org"
 
+# -------------------------------------------------------------------------------------------------------------------- #
+# -----------------------------------------------------< SCRIPT >----------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------- #
+
 :do {
   /ip firewall address-list add list=acme address=0.0.0.0/0 timeout=00:01:10 comment="[ROS] ACME running..."
   /ip service enable www
   /certificate enable-ssl-certificate dns-name=$domain; :delay 60s
   /ip service disable www
-  :log info "ACME: SSL certificate updated!"
-} on-error={ :log error "ACME: Failed to update SSL certificate!" }
+  :log info "ACME: SSL certificate ($domain) updated!"
+} on-error={ :log error "ACME: Failed to update SSL certificate ($domain)!" }

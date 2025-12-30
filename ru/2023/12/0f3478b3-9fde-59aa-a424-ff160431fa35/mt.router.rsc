@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------------------------------------------- #
-# MIKROTIK: BASE
+# BASE
 # -------------------------------------------------------------------------------------------------------------------- #
 # @package    RouterOS
 # @author     Kai Kimera <mail@kaikim.ru>
@@ -11,8 +11,9 @@
 # /interface ethernet set [find default-name="ether1"] mac-address="00:00:00:00:00:00"
 # -------------------------------------------------------------------------------------------------------------------- #
 
-# Administrator password.
-:local rosAdminPassword "PassWord"
+# Administrator and user passwords.
+:local rosAdminPassword "pa$$word"
+:local rosUserPassword "pa$$word"
 
 # Bridge.
 :local rosBridgeName "bridge1"
@@ -27,9 +28,6 @@
 
 # Network domain name.
 :local rosNwDomain "home.lan"
-
-# Port knocking.
-:local rosIcmpKnockSize 100
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # -----------------------------------------------------< SCRIPT >----------------------------------------------------- #
@@ -68,7 +66,7 @@ add name=dhcp ranges=10.1.200.1-10.1.200.254
 add address-pool=dhcp interface=$rosBridgeName name=dhcp1
 
 /ip neighbor discovery-settings
-set discover-interface-list=LAN
+set discover-interface-list=none
 
 /ip address
 add address=10.1.0.1/16 interface=$rosBridgeName network=10.1.0.0
@@ -93,19 +91,10 @@ add action=accept chain=input connection-state=established,related,untracked \
   comment="[ROS] Established, Related, Untracked"
 add action=drop chain=input connection-state=invalid \
   comment="[ROS] Invalid"
-add action=add-src-to-address-list address-list="AdminCP" address-list-timeout=30m chain=input in-interface-list=WAN \
-  packet-size=($rosIcmpKnockSize + 28) protocol=icmp \
-  comment="[ROS] ICMP port knocking for AdminCP"
 add action=accept chain=input protocol=icmp \
   comment="[ROS] ICMP"
-add action=accept chain=input in-interface-list=GRE protocol=ospf disabled=yes \
-  comment="[ROS] OSPF"
-add action=accept chain=input dst-port=53 in-interface-list=GRE protocol=udp disabled=yes \
-  comment="[ROS] DNS"
-add action=accept chain=input dst-port=9090,22022 protocol=tcp src-address-list="AdminCP" \
-  comment="[ROS] WinBox and SSH"
-add action=accept chain=input dst-port=9090,22022 in-interface-list=GRE protocol=tcp disabled=yes \
-  comment="[ROS] WinBox and SSH"
+add action=accept chain=input dst-port=8291 protocol=tcp src-address-list=winbox \
+  comment="[ROS] WinBox"
 add action=drop chain=input in-interface-list=!LAN \
   comment="[ROS] All not coming from LAN"
 add action=accept chain=forward ipsec-policy=in,ipsec disabled=yes \
@@ -125,14 +114,20 @@ add action=drop chain=forward connection-nat-state=!dstnat connection-state=new 
 add action=masquerade chain=srcnat ipsec-policy=out,none out-interface-list=WAN \
   comment="[ROS] Masquerade"
 
+/ip firewall address-list
+add list=winbox address=10.0.0.0/8
+
 /ip service
-set telnet disabled=yes
-set ftp disabled=yes
-set www disabled=yes
-set ssh port=22022
 set api disabled=yes
-set winbox port=9090
 set api-ssl disabled=yes
+set ftp disabled=yes
+set ssh disabled=yes
+set telnet disabled=yes
+set www disabled=yes
+set www-ssl disabled=yes
+
+/ip ssh
+set host-key-type=ed25519 strong-crypto=yes
 
 /system clock
 set time-zone-name=Europe/Moscow
@@ -147,13 +142,13 @@ set enabled=yes
 set enabled=yes manycast=yes multicast=yes
 
 /system ntp client servers
-add address="0.ru.pool.ntp.org"
-add address="1.ru.pool.ntp.org"
-add address="time.google.com"
-add address="time.cloudflare.com"
+add address="0.pool.ntp.org"
+add address="1.pool.ntp.org"
+add address="2.pool.ntp.org"
+add address="3.pool.ntp.org"
 
 /system routerboard settings
-set silent-boot=yes
+set auto-upgrade=yes silent-boot=yes
 
 /system watchdog
 set automatic-supout=no
@@ -164,11 +159,16 @@ set enabled=no
 /tool mac-server
 set allowed-interface-list=none
 
+/tool mac-server mac-winbox
+set allowed-interface-list=none
+
 /tool mac-server ping
 set enabled=no
 
 /user
 set [find name="admin"] password="$rosAdminPassword"
+add name="u0000" password="$rosUserPassword" group=full
+disable admin
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # Router ID.

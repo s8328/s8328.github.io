@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------------------------------------------- #
-# MIKROTIK: GRE DYNAMIC IP
+# GRE: DYNAMIC IP
 # -------------------------------------------------------------------------------------------------------------------- #
 # @package    RouterOS
 # @author     Kai Kimera <mail@kaikim.ru>
@@ -11,6 +11,10 @@
 # -------------------------------------------------------------------------------------------------------------------- #
 
 :local wanInterface "ether1"
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# -----------------------------------------------------< SCRIPT >----------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 :local wanAddress [/ip address get [find interface=$wanInterface] address]
 :set wanAddress [:pick $wanAddress 0 [:find $wanAddress "/"]]
@@ -27,6 +31,6 @@
 
   :if ($greRemoteAddrNew != $greRemoteAddrOld) do={
     /interface gre set $i remote-address=$greRemoteAddrNew
-    :log info ("GRE: Updating remote address ($greHost) from $greRemoteAddrOld to $greRemoteAddrNew.")
+    :log info ("GRE: $greHost ($greRemoteAddrOld => $greRemoteAddrNew)")
   }
 }
